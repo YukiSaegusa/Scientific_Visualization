@@ -93,7 +93,7 @@ run 2000
 unfix 2
 # 制約条件2を外す
 
-run 1000
+run 20000
 
 
 #unfix 1
