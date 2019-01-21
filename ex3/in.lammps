@@ -1,0 +1,103 @@
+variable electron     equal 1.6022e-19                 # Electron Volt [J]
+variable avogadro     equal 6.02214e+23                # Avogadro Constant
+variable lattice      equal 3.639                      # Lattice Constant
+variable npt_temp      equal 0.1                     # Temperature
+variable nve_temp     equal 0                     # Temperature
+variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
+variable mass         equal 63.5460                    # Atomic Mass
+variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
+variable current_time equal time
+# variable rand         equal 4928459                    # Random Seed
+
+units       metal 
+# シミュレーションにおける単位スタイルを設定
+# Metalの場合は以下の単位系が設定される
+
+#	mass = grams/mole
+#	distance = Angstroms
+#	time = picoseconds
+#	energy = eV
+#	velocity = Angstroms/picosecond
+#	force = eV/Angstrom
+#	torque = eV
+#	temperature = Kelvin
+#	pressure = bars
+#	dynamic viscosity = Poise
+#	charge = multiple of electron charge (1.0 is a proton)
+#	dipole = charge*Angstroms
+#	electric field = volts/Angstrom
+#	density = gram/cm^dim
+
+
+atom_style  atomic
+# 原子スタイルを定義。基本はatomicオプションを使用
+# 各原子ごとに座標、速度、原子ID、タイプが格納される。
+
+boundary p p p
+# 境界条件設定
+# ｘｙｚ方向すべてについてperiodic(周期的)に設定
+
+timestep    0.001
+# 単位系(units)がmetalの時、単位はps(ピコセック)
+
+# read_data   ./Cu_no_center.lat
+read_data   ./Cu.lat
+# read_data ./Cu_add_atom.lat
+# read_data ./Cu_fix_x.lat
+# latticeファイル(原子の配列情報が記述されたファイル)を読み込む
+
+pair_style  eam/fs
+# 原子間ポテンシャルを設定
+# 基本的にはeam/fsポテンシャルを用いる。
+
+pair_coeff  * * /home/hayakawa/potentials/sfe44.1.eam.fs Cu
+# 2原子間にはたらく力を導入する。力の場係数
+# ここでは外部データを参照することにより設定している
+
+mass        1 ${mass}
+# 原子タイプ1と定義する原子に対して、質量の値をmassに設定
+# variableにより定義した変数の値を用いる際は、${}で変数名をくくる
+
+fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
+# 制約条件の設定
+# 制約条件の名前を1とおく
+# allの原子に対して課す
+# 変化しないものを並べてる
+# nve : 原子数n、体積v、エネルギーe
+# npt : 原子数n、圧力p、温度t
+
+## thermoはLAMMMPSのLOGファイルへの出力を設定
+thermo 100
+# 100タイムステップごとにlogファイルへ出力
+thermo_style custom step temp lx ly lz etotal
+# 出力情報の編集。
+# timestep,temperture,pressure,total energy,simulation timeを出力
+
+
+# STABILIZE INITIAL STATE
+# Set Temperature Following Gaussian Distribution
+velocity all create ${npt_temp} ${rand} dist gaussian
+print ${rand}
+
+# Stabilize
+fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
+# 制約条件の設定
+# 制約条件の名前を2とおく
+# allの原子に対して課す
+# 1タイムステップ毎にtempertureをrescale確認
+# 開始時及び終了時の望ましい温度はそれぞれMD_temp
+run 2000
+# runを用いて初めて、上記で定義してきた計算を回している。
+# 1000タイムステップ繰り返す
+
+unfix 2
+# 制約条件2を外す
+
+run 1000
+
+
+#unfix 1
+
+#fix 3 all nve
+#velocity all create ${nve_temp} ${rand} dist gaussian
+#run 1000
