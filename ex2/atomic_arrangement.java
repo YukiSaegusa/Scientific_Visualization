@@ -40,9 +40,10 @@ public class atomic_arrangement {
     output_file = metal + ".lat";
     a_types = 1;
     a = 3.639;
-    lat = 4;
+    lat = 5;
     // N=Math.pow(lat+1,3)+3*lat*(lat+1)*lat;
-    N = 4 * Math.pow(lat, 3) -1;
+    // N = 4 * Math.pow(lat, 3) + 1;
+    N = 4 * Math.pow(lat, 3) - 1;
 
     // 1辺が偶数個の時はど真ん中が存在。
     // 奇数個の時はど真ん中が存在しないため、原点よりにする。

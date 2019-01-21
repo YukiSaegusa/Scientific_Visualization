@@ -1,0 +1,201 @@
+LAMMPS (10 Feb 2015)
+variable electron     equal 1.6022e-19                 # Electron Volt [J]
+variable avogadro     equal 6.02214e+23                # Avogadro Constant
+variable lattice      equal 3.639                      # Lattice Constant
+variable npt_temp      equal 0.1                     # Temperature
+variable nve_temp     equal 0                     # Temperature
+variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
+variable mass         equal 63.5460                    # Atomic Mass
+variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
+variable mass_kg      equal (63.546/${avogadro})/1000 
+variable mass_kg      equal (63.546/6.02214e+23)/1000 
+variable current_time equal time
+# variable rand         equal 4928459                    # Random Seed
+
+units       metal
+# シミュレーションにおける単位スタイルを設定
+# Metalの場合は以下の単位系が設定される
+
+#	mass = grams/mole
+#	distance = Angstroms
+#	time = picoseconds
+#	energy = eV
+#	velocity = Angstroms/picosecond
+#	force = eV/Angstrom
+#	torque = eV
+#	temperature = Kelvin
+#	pressure = bars
+#	dynamic viscosity = Poise
+#	charge = multiple of electron charge (1.0 is a proton)
+#	dipole = charge*Angstroms
+#	electric field = volts/Angstrom
+#	density = gram/cm^dim
+
+
+atom_style  atomic
+# 原子スタイルを定義。基本はatomicオプションを使用
+# 各原子ごとに座標、速度、原子ID、タイプが格納される。
+
+boundary p p p
+# 境界条件設定
+# ｘｙｚ方向すべてについてperiodic(周期的)に設定
+
+timestep    0.001
+# 単位系(units)がmetalの時、単位はps(ピコセック)
+
+# read_data   ./Cu_no_center.lat
+read_data   ./Cu.lat
+  orthogonal box = (0 0 0) to (14.556 14.556 14.556)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  256 atoms
+# read_data ./Cu_add_atom.lat
+# read_data ./Cu_fix_x.lat
+# latticeファイル(原子の配列情報が記述されたファイル)を読み込む
+
+pair_style  eam/fs
+# 原子間ポテンシャルを設定
+# 基本的にはeam/fsポテンシャルを用いる。
+
+pair_coeff  * * /home/hayakawa/potentials/sfe44.1.eam.fs Cu
+# 2原子間にはたらく力を導入する。力の場係数
+# ここでは外部データを参照することにより設定している
+
+mass        1 ${mass}
+mass        1 63.546
+# 原子タイプ1と定義する原子に対して、質量の値をmassに設定
+# variableにより定義した変数の値を用いる際は、${}で変数名をくくる
+
+fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
+fix 1 all npt temp 0.1 ${npt_temp} 1 iso ${press} ${press} 1
+fix 1 all npt temp 0.1 0.1 1 iso ${press} ${press} 1
+fix 1 all npt temp 0.1 0.1 1 iso 1.01325 ${press} 1
+fix 1 all npt temp 0.1 0.1 1 iso 1.01325 1.01325 1
+# 制約条件の設定
+# 制約条件の名前を1とおく
+# allの原子に対して課す
+# 変化しないものを並べてる
+# nve : 原子数n、体積v、エネルギーe
+# npt : 原子数n、圧力p、温度t
+
+## dumpは外部ファイルへの出力情報を設定
+#dump 0 all cfg 100 all.*.cfg mass type xs ys zs id
+# この工程の名前を0とおく。
+# 全ての原子に対して処理を行う
+# cfgファイルへ、1000タイムステップ毎に出力
+# 出力ファイル名は、all.*.cfg
+# 出力内容は、原子のmass,type,xs,ys,zs,id情報
+#dump_modify 0 element Cu
+# 名前が0のdump工程に対し、追記
+# dumpにてtypeで出力された原子タイプについて、原子タイプが1のものは1ではなくCuと表示させる
+
+
+## thermoはLAMMMPSのLOGファイルへの出力を設定
+thermo 100
+# 100タイムステップごとにlogファイルへ出力
+thermo_style custom step temp press etotal time vol
+# 出力情報の編集。
+# timestep,temperture,pressure,total energy,simulation timeを出力
+
+
+# STABILIZE INITIAL STATE
+# Set Temperature Following Gaussian Distribution
+velocity all create ${npt_temp} ${rand} dist gaussian
+velocity all create 0.1 ${rand} dist gaussian
+velocity all create 0.1 30224 dist gaussian
+print ${rand}
+print 30224
+30224
+
+# Stabilize
+fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
+fix 2 all temp/rescale 1 0.1 ${npt_temp} 0.5 1.0
+fix 2 all temp/rescale 1 0.1 0.1 0.5 1.0
+# 制約条件の設定
+# 制約条件の名前を2とおく
+# allの原子に対して課す
+# 1タイムステップ毎にtempertureをrescale確認
+# 開始時及び終了時の望ましい温度はそれぞれMD_temp
+run 1000
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 10 steps, check yes
+  master list distance cutoff = 8
+Memory usage per processor = 2.16537 Mbytes
+Step Temp Press TotEng Time Volume 
+       0          0.1    36.287964   -876.21281            0    3084.0836 
+     100  0.051282725    7.8940374    -876.2128          0.1    3084.1439 
+     200  0.045286496   -31.931883   -876.21278          0.2    3084.2293 
+     300  0.054747501   -18.983221   -876.21274          0.3    3084.2018 
+     400  0.044251921    27.082295   -876.21269          0.4    3084.1018 
+     500  0.060498422    32.236978   -876.21263          0.5    3084.0918 
+     600  0.053350628   -13.960603   -876.21259          0.6    3084.1909 
+     700  0.054561224   -38.447137   -876.21254          0.7     3084.243 
+     800  0.065995572    1.1939042    -876.2125          0.8    3084.1587 
+     900  0.054432276    44.622651   -876.21245          0.9    3084.0647 
+    1000  0.051437248    18.917046    -876.2124            1    3084.1193 
+Loop time of 0.242242 on 8 procs for 1000 steps with 256 atoms
+
+Pair  time (%) = 0.168254 (69.4571)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.0486122 (20.0676)
+Outpt time (%) = 0.000179917 (0.0742714)
+Other time (%) = 0.0251956 (10.401)
+
+Nlocal:    32 ave 32 max 32 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Nghost:    1067 ave 1067 max 1067 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Neighs:    2816 ave 3094 max 2526 min
+Histogram: 1 1 1 1 0 0 1 1 0 2
+
+Total # of neighbors = 22528
+Ave neighs/atom = 88
+Neighbor list builds = 0
+Dangerous builds = 0
+# runを用いて初めて、上記で定義してきた計算を回している。
+# 1000タイムステップ繰り返す
+
+unfix 2
+# 制約条件2を外す
+
+run 1000
+Memory usage per processor = 2.16537 Mbytes
+Step Temp Press TotEng Time Volume 
+    1000  0.051437248    18.917046    -876.2124            1    3084.1193 
+    1100  0.062671145   -41.416698   -876.21234          1.1    3084.2505 
+    1200   0.04850301   -37.905174   -876.21228          1.2    3084.2423 
+    1300  0.056273096    34.921473   -876.21222          1.3    3084.0851 
+    1400  0.079693235    62.933444   -876.21215          1.4    3084.0255 
+    1500   0.05839314   -13.800678   -876.21208          1.5    3084.1905 
+    1600  0.061913901   -82.292367   -876.21201          1.6    3084.3388 
+    1700  0.069011613    -16.93507   -876.21194          1.7    3084.1969 
+    1800  0.060221863    95.450858   -876.21187          1.8     3083.955 
+    1900   0.07977696    63.143726    -876.2118          1.9     3084.025 
+    2000  0.056620141   -83.943224   -876.21172            2    3084.3422 
+Loop time of 0.262586 on 8 procs for 1000 steps with 256 atoms
+
+Pair  time (%) = 0.181396 (69.0806)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.0585733 (22.3064)
+Outpt time (%) = 0.00018248 (0.0694934)
+Other time (%) = 0.0224342 (8.54356)
+
+Nlocal:    32 ave 36 max 28 min
+Histogram: 1 2 0 0 0 2 0 1 0 2
+Nghost:    1067 ave 1071 max 1063 min
+Histogram: 2 0 1 0 0 2 0 0 2 1
+Neighs:    2816 ave 3390 max 2172 min
+Histogram: 1 0 1 1 0 2 1 0 1 1
+
+Total # of neighbors = 22528
+Ave neighs/atom = 88
+Neighbor list builds = 0
+Dangerous builds = 0
+
+
+#unfix 1
+
+#fix 3 all nve
+#velocity all create ${nve_temp} ${rand} dist gaussian
+#run 1000

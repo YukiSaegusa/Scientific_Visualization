@@ -66,10 +66,22 @@ fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
 # nve : 原子数n、体積v、エネルギーe
 # npt : 原子数n、圧力p、温度t
 
+## dumpは外部ファイルへの出力情報を設定
+#dump 0 all cfg 100 all.*.cfg mass type xs ys zs id
+# この工程の名前を0とおく。
+# 全ての原子に対して処理を行う
+# cfgファイルへ、1000タイムステップ毎に出力
+# 出力ファイル名は、all.*.cfg
+# 出力内容は、原子のmass,type,xs,ys,zs,id情報
+#dump_modify 0 element Cu
+# 名前が0のdump工程に対し、追記
+# dumpにてtypeで出力された原子タイプについて、原子タイプが1のものは1ではなくCuと表示させる
+
+
 ## thermoはLAMMMPSのLOGファイルへの出力を設定
 thermo 100
 # 100タイムステップごとにlogファイルへ出力
-thermo_style custom step temp lx ly lz etotal
+thermo_style custom step temp press etotal time vol
 # 出力情報の編集。
 # timestep,temperture,pressure,total energy,simulation timeを出力
 
@@ -86,14 +98,14 @@ fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
 # allの原子に対して課す
 # 1タイムステップ毎にtempertureをrescale確認
 # 開始時及び終了時の望ましい温度はそれぞれMD_temp
-run 2000
+run 1000
 # runを用いて初めて、上記で定義してきた計算を回している。
 # 1000タイムステップ繰り返す
 
 unfix 2
 # 制約条件2を外す
 
-run 1000
+run 20000
 
 
 #unfix 1
