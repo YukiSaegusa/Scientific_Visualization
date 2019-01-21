@@ -42,7 +42,7 @@ public class atomic_arrangement {
     a = 3.639;
     lat = 4;
     // N=Math.pow(lat+1,3)+3*lat*(lat+1)*lat;
-    N = 4 * Math.pow(lat, 3) + 1;
+    N = 4 * Math.pow(lat, 3) -1;
 
     // 1辺が偶数個の時はど真ん中が存在。
     // 奇数個の時はど真ん中が存在しないため、原点よりにする。
@@ -84,44 +84,14 @@ public class atomic_arrangement {
 
       // 格子の頂点原子の配置
       // kadai 2
-      // for (int z = 0; z < lat; z++) {
-      // for (int y = 0; y < lat; y++) {
-      // for (int x = 0; x < lat; x++) {
-      // // if(x == center && y == center && z == center){
-      // // center_id = n;
-      // // }
-      // if (!(x == center && y == center && z == center)) {
-      // pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a,
-      // vert[2] + z * a);
-      // n++;
-      // }
-      // pw.format("%d %d %f %f %f\n", n, a_types, surf1[0] + x * a, surf1[1] + y * a,
-      // surf1[2] + z * a);
-      // n++;
-      // pw.format("%d %d %f %f %f\n", n, a_types, surf2[0] + x * a, surf2[1] + y * a,
-      // surf2[2] + z * a);
-      // n++;
-      // pw.format("%d %d %f %f %f\n", n, a_types, surf3[0] + x * a, surf3[1] + y * a,
-      // surf3[2] + z * a);
-      // n++;
-      // }
-      // }
-      // }
-
-      // kadai3
       for (int z = 0; z < lat; z++) {
         for (int y = 0; y < lat; y++) {
           for (int x = 0; x < lat; x++) {
-            // if(x == center && y == center && z == center){
-            // center_id = n;
-            // }
+            if(x == center && y == center && z == center){
+            center_id = n;
+            }
             if (!(x == center && y == center && z == center)) {
               pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a);
-              n++;
-            } else {
-              pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a - a / 3);
-              n++;
-              pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a + a / 3);
               n++;
             }
             pw.format("%d %d %f %f %f\n", n, a_types, surf1[0] + x * a, surf1[1] + y * a, surf1[2] + z * a);
@@ -133,6 +103,32 @@ public class atomic_arrangement {
           }
         }
       }
+
+      // kadai3
+      // for (int z = 0; z < lat; z++) {
+      //   for (int y = 0; y < lat; y++) {
+      //     for (int x = 0; x < lat; x++) {
+      //       // if(x == center && y == center && z == center){
+      //       // center_id = n;
+      //       // }
+      //       if (!(x == center && y == center && z == center)) {
+      //         pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a);
+      //         n++;
+      //       } else {
+      //         pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a - a / 3);
+      //         n++;
+      //         pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a + a / 3);
+      //         n++;
+      //       }
+      //       pw.format("%d %d %f %f %f\n", n, a_types, surf1[0] + x * a, surf1[1] + y * a, surf1[2] + z * a);
+      //       n++;
+      //       pw.format("%d %d %f %f %f\n", n, a_types, surf2[0] + x * a, surf2[1] + y * a, surf2[2] + z * a);
+      //       n++;
+      //       pw.format("%d %d %f %f %f\n", n, a_types, surf3[0] + x * a, surf3[1] + y * a, surf3[2] + z * a);
+      //       n++;
+      //     }
+      //   }
+      // }
 
       /*
        * //格子内のx軸に垂直な面に存在する原子の配置 for(int z=0;z<lat;z++){ for(int y=0;y<lat;y++){
