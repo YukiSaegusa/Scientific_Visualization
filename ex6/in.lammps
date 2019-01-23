@@ -1,8 +1,7 @@
 variable electron     equal 1.6022e-19                 # Electron Volt [J]
 variable avogadro     equal 6.02214e+23                # Avogadro Constant
 variable lattice      equal 3.639                      # Lattice Constant
-variable npt_temp      equal 0.1                     # Temperature
-variable nve_temp     equal 0                     # Temperature
+variable npt_temp      equal 0.1                       # Temperature #ここ変える
 variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
 variable mass         equal 63.5460                    # Atomic Mass
 variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
@@ -58,7 +57,8 @@ mass        1 ${mass}
 # 原子タイプ1と定義する原子に対して、質量の値をmassに設定
 # variableにより定義した変数の値を用いる際は、${}で変数名をくくる
 
-fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
+fix 1 all nve
+# fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
 # 制約条件の設定
 # 制約条件の名前を1とおく
 # allの原子に対して課す
@@ -76,25 +76,24 @@ thermo_style custom step temp lx ly lz etotal
 
 # STABILIZE INITIAL STATE
 # Set Temperature Following Gaussian Distribution
-velocity all create ${npt_temp} ${rand} dist gaussian
-print ${rand}
+# velocity all create ${npt_temp} ${rand} dist gaussian
+# print ${rand}
 
 # Stabilize
-fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
+# fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
 # 制約条件の設定
 # 制約条件の名前を2とおく
 # allの原子に対して課す
 # 1タイムステップ毎にtempertureをrescale確認
 # 開始時及び終了時の望ましい温度はそれぞれMD_temp
-run 2000
+run 1000
 # runを用いて初めて、上記で定義してきた計算を回している。
 # 1000タイムステップ繰り返す
 
 unfix 2
 # 制約条件2を外す
 
-run 1000
-
+run 20000
 
 #unfix 1
 
