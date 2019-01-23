@@ -67,8 +67,10 @@ fix 1 all nve
 # npt : 原子数n、圧力p、温度t
 
 ## thermoはLAMMMPSのLOGファイルへの出力を設定
-thermo 100
+# thermo 100
+thermo 1
 # 100タイムステップごとにlogファイルへ出力
+# thermo_style custom step pxx pyy pzz pxy pyz pxz lx ly lz etotal
 thermo_style custom step temp lx ly lz etotal
 # 出力情報の編集。
 # timestep,temperture,pressure,total energy,simulation timeを出力
@@ -86,14 +88,15 @@ thermo_style custom step temp lx ly lz etotal
 # allの原子に対して課す
 # 1タイムステップ毎にtempertureをrescale確認
 # 開始時及び終了時の望ましい温度はそれぞれMD_temp
-run 1000
+# run 1000
 # runを用いて初めて、上記で定義してきた計算を回している。
 # 1000タイムステップ繰り返す
 
 unfix 2
 # 制約条件2を外す
 
-run 20000
+# run 20000
+minimize 1.0e-8 1.0e-8 10000 10000
 
 #unfix 1
 
