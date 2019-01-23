@@ -40,7 +40,7 @@ public class atomic_arrangement {
     output_file = metal + ".lat";
     a_types = 1;
     a = 3.639;
-    lat = 5;
+    lat = 1;
     // N=Math.pow(lat+1,3)+3*lat*(lat+1)*lat;
     // N = 4 * Math.pow(lat, 3) + 1;
     N = 4 * Math.pow(lat, 3) - 1;
@@ -89,7 +89,7 @@ public class atomic_arrangement {
         for (int y = 0; y < lat; y++) {
           for (int x = 0; x < lat; x++) {
             if(x == center && y == center && z == center){
-            center_id = n;
+              center_id = n;
             }
             if (!(x == center && y == center && z == center)) {
               pw.format("%d %d %f %f %f\n", n, a_types, vert[0] + x * a, vert[1] + y * a, vert[2] + z * a);
