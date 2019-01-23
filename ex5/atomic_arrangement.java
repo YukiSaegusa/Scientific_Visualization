@@ -72,7 +72,7 @@ public class atomic_arrangement {
       pw.println("");
       pw.format("%d atoms\n", (int) N);
       pw.format("%d atom types\n", a_types);
-      pw.format("0.0 %f xlo xhi\n", a * lat);
+      pw.format("0.0 %f xlo xhi\n",a*(lat+5));
       pw.format("0.0 %f ylo yhi\n", a * lat);
       pw.format("0.0 %f zlo zhi\n", a * lat);
       pw.println("");
