@@ -1,8 +1,7 @@
 variable electron     equal 1.6022e-19                 # Electron Volt [J]
 variable avogadro     equal 6.02214e+23                # Avogadro Constant
 variable lattice      equal 3.639                      # Lattice Constant
-variable npt_temp      equal 0.1                     # Temperature
-variable nve_temp     equal 0                     # Temperature
+variable npt_temp      equal 400                       # Temperature #ここ変える
 variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
 variable mass         equal 63.5460                    # Atomic Mass
 variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
