@@ -1,0 +1,164 @@
+LAMMPS (10 Feb 2015)
+variable electron     equal 1.6022e-19                 # Electron Volt [J]
+variable avogadro     equal 6.02214e+23                # Avogadro Constant
+variable lattice      equal 3.639                      # Lattice Constant
+variable npt_temp      equal 0.1                     # Temperature
+variable nve_temp     equal 0                     # Temperature
+variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
+variable mass         equal 63.5460                    # Atomic Mass
+variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
+variable mass_kg      equal (63.546/${avogadro})/1000 
+variable mass_kg      equal (63.546/6.02214e+23)/1000 
+variable current_time equal time
+# variable rand         equal 4928459                    # Random Seed
+
+units       metal
+# シミュレーションにおける単位スタイルを設定
+# Metalの場合は以下の単位系が設定される
+
+#	mass = grams/mole
+#	distance = Angstroms
+#	time = picoseconds
+#	energy = eV
+#	velocity = Angstroms/picosecond
+#	force = eV/Angstrom
+#	torque = eV
+#	temperature = Kelvin
+#	pressure = bars
+#	dynamic viscosity = Poise
+#	charge = multiple of electron charge (1.0 is a proton)
+#	dipole = charge*Angstroms
+#	electric field = volts/Angstrom
+#	density = gram/cm^dim
+
+
+atom_style  atomic
+# 原子スタイルを定義。基本はatomicオプションを使用
+# 各原子ごとに座標、速度、原子ID、タイプが格納される。
+
+boundary p p p
+# 境界条件設定
+# ｘｙｚ方向すべてについてperiodic(周期的)に設定
+
+timestep    0.001
+# 単位系(units)がmetalの時、単位はps(ピコセック)
+
+# read_data   ./Cu_no_center.lat
+read_data   ./Cu.lat
+  orthogonal box = (0 0 0) to (14.5633 14.556 14.556)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  256 atoms
+# read_data ./Cu_add_atom.lat
+# read_data ./Cu_fix_x.lat
+# latticeファイル(原子の配列情報が記述されたファイル)を読み込む
+
+pair_style  eam/fs
+# 原子間ポテンシャルを設定
+# 基本的にはeam/fsポテンシャルを用いる。
+
+pair_coeff  * * /home/hayakawa/potentials/sfe44.1.eam.fs Cu
+# 2原子間にはたらく力を導入する。力の場係数
+# ここでは外部データを参照することにより設定している
+
+mass        1 ${mass}
+mass        1 63.546
+# 原子タイプ1と定義する原子に対して、質量の値をmassに設定
+# variableにより定義した変数の値を用いる際は、${}で変数名をくくる
+
+fix 1 all nve
+#fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
+# 制約条件の設定
+# 制約条件の名前を1とおく
+# allの原子に対して課す
+# 変化しないものを並べてる
+# nve : 原子数n、体積v、エネルギーe
+# npt : 原子数n、圧力p、温度t
+
+## dumpは外部ファイルへの出力情報を設定
+dump 0 all cfg 100 all.*.cfg mass type xs ys zs id
+# この工程の名前を0とおく。
+# 全ての原子に対して処理を行う
+# cfgファイルへ、1000タイムステップ毎に出力
+# 出力ファイル名は、all.*.cfg
+# 出力内容は、原子のmass,type,xs,ys,zs,id情報
+dump_modify 0 element Cu
+# 名前が0のdump工程に対し、追記
+# dumpにてtypeで出力された原子タイプについて、原子タイプが1のものは1ではなくCuと表示させる
+
+
+## thermoはLAMMMPSのLOGファイルへの出力を設定
+thermo 1
+# 100タイムステップごとにlogファイルへ出力
+thermo_style custom step pxx pyy pzz pxy pyz pxz lx ly lz etotal
+# 出力情報の編集。
+# timestep,temperture,pressure,total energy,simulation timeを出力
+
+
+# STABILIZE INITIAL STATE
+# Set Temperature Following Gaussian Distribution
+#velocity all create ${npt_temp} ${rand} dist gaussian
+#print ${rand}
+#create は乱数を用いる
+
+# Stabilize
+#fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
+# 制約条件の設定
+# 制約条件の名前を2とおく
+# allの原子に対して課す
+# 1タイムステップ毎にtempertureをrescale確認
+# 開始時及び終了時の望ましい温度はそれぞれMD_temp
+#run 1000
+# runを用いて初めて、上記で定義してきた計算を回している。
+# 1000タイムステップ繰り返す
+
+#unfix 2
+# 制約条件2を外す
+
+#run 1000
+
+minimize 1.0e-8 1.0e-8 10000 10000
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 8
+Memory usage per processor = 4.54184 Mbytes
+Step Pxx Pyy Pzz Pxy Pyz Pxz Lx Ly Lz TotEng 
+       0   -833.47747   -600.14004   -600.14004 6.9176502e-13 5.1882377e-13 -2.3058834e-13    14.563278       14.556       14.556   -876.21533 
+       1   -832.76426   -600.17666   -600.17666 -5.5341202e-12 -1.7294126e-12 -6.5717677e-12    14.563278       14.556       14.556   -876.21572 
+       2   -832.76426   -600.17666   -600.17666 -5.5341202e-12 9.8000045e-13 -6.110591e-12    14.563278       14.556       14.556   -876.21572 
+Loop time of 0.0048261 on 8 procs for 2 steps with 256 atoms
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -876.215329591     -876.215720588     -876.215720588
+  Force two-norm initial, final = 0.107447 4.12445e-06
+  Force max component initial, final = 0.00672061 3.56509e-07
+  Final line search alpha, max atom move = 1 3.56509e-07
+  Iterations, force evaluations = 2 4
+
+Pair  time (%) = 0.00131828 (27.3156)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000653267 (13.5361)
+Outpt time (%) = 3.50773e-05 (0.726826)
+Other time (%) = 0.00281948 (58.4215)
+
+Nlocal:    32 ave 32 max 32 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Nghost:    1067 ave 1067 max 1067 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Neighs:    2816 ave 3094 max 2526 min
+Histogram: 1 1 1 1 0 0 1 1 0 2
+
+Total # of neighbors = 22528
+Ave neighs/atom = 88
+Neighbor list builds = 0
+Dangerous builds = 0
+
+#unfix 1
+
+#fix 3 all nve
+#velocity all create ${nve_temp} ${rand} dist gaussian
+#run 1000

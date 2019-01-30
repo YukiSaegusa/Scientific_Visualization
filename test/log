@@ -1,0 +1,46 @@
+WARNING: Unable to read mpd.hosts or list of hosts isn't provided. MPI job will be run on the current machine only.
+LAMMPS (10 Feb 2015)
+Reading data file ...
+  orthogonal box = (0 0 0) to (14.5633 14.556 14.556)
+  2 by 2 by 2 MPI processor grid
+  reading atoms ...
+  256 atoms
+WARNING: Resetting reneighboring criteria during minimization (../min.cpp:168)
+Neighbor list info ...
+  1 neighbor list requests
+  update every 1 steps, delay 0 steps, check yes
+  master list distance cutoff = 8
+Setting up minimization ...
+Memory usage per processor = 4.54184 Mbytes
+Step Pxx Pyy Pzz Pxy Pyz Pxz Lx Ly Lz TotEng 
+       0   -833.47747   -600.14004   -600.14004 6.9176502e-13 5.1882377e-13 -2.3058834e-13    14.563278       14.556       14.556   -876.21533 
+       1   -832.76426   -600.17666   -600.17666 -5.5341202e-12 -1.7294126e-12 -6.5717677e-12    14.563278       14.556       14.556   -876.21572 
+       2   -832.76426   -600.17666   -600.17666 -5.5341202e-12 9.8000045e-13 -6.110591e-12    14.563278       14.556       14.556   -876.21572 
+Loop time of 0.0048261 on 8 procs for 2 steps with 256 atoms
+
+Minimization stats:
+  Stopping criterion = energy tolerance
+  Energy initial, next-to-last, final = 
+        -876.215329591     -876.215720588     -876.215720588
+  Force two-norm initial, final = 0.107447 4.12445e-06
+  Force max component initial, final = 0.00672061 3.56509e-07
+  Final line search alpha, max atom move = 1 3.56509e-07
+  Iterations, force evaluations = 2 4
+
+Pair  time (%) = 0.00131828 (27.3156)
+Neigh time (%) = 0 (0)
+Comm  time (%) = 0.000653267 (13.5361)
+Outpt time (%) = 3.50773e-05 (0.726826)
+Other time (%) = 0.00281948 (58.4215)
+
+Nlocal:    32 ave 32 max 32 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Nghost:    1067 ave 1067 max 1067 min
+Histogram: 8 0 0 0 0 0 0 0 0 0
+Neighs:    2816 ave 3094 max 2526 min
+Histogram: 1 1 1 1 0 0 1 1 0 2
+
+Total # of neighbors = 22528
+Ave neighs/atom = 88
+Neighbor list builds = 0
+Dangerous builds = 0

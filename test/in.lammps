@@ -1,14 +1,15 @@
 variable electron     equal 1.6022e-19                 # Electron Volt [J]
 variable avogadro     equal 6.02214e+23                # Avogadro Constant
 variable lattice      equal 3.639                      # Lattice Constant
-variable npt_temp      equal 0.1                       # Temperature #ここ変える
+variable npt_temp      equal 0.1                     # Temperature
+variable nve_temp     equal 0                     # Temperature
 variable press	      equal 1.01325                    # Pressure [bar](= 1atm)
 variable mass         equal 63.5460                    # Atomic Mass
 variable mass_kg      equal (${mass}/${avogadro})/1000 # Atomic Mass [kg]
 variable current_time equal time
 # variable rand         equal 4928459                    # Random Seed
 
-units       metal 
+units       metal
 # シミュレーションにおける単位スタイルを設定
 # Metalの場合は以下の単位系が設定される
 
@@ -58,7 +59,7 @@ mass        1 ${mass}
 # variableにより定義した変数の値を用いる際は、${}で変数名をくくる
 
 fix 1 all nve
-# fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
+#fix 1 all npt temp ${npt_temp} ${npt_temp} 1 iso ${press} ${press} 1
 # 制約条件の設定
 # 制約条件の名前を1とおく
 # allの原子に対して課す
@@ -66,34 +67,49 @@ fix 1 all nve
 # nve : 原子数n、体積v、エネルギーe
 # npt : 原子数n、圧力p、温度t
 
+## dumpは外部ファイルへの出力情報を設定
+dump 0 all cfg 100 all.*.cfg mass type xs ys zs id
+# この工程の名前を0とおく。
+# 全ての原子に対して処理を行う
+# cfgファイルへ、1000タイムステップ毎に出力
+# 出力ファイル名は、all.*.cfg
+# 出力内容は、原子のmass,type,xs,ys,zs,id情報
+dump_modify 0 element Cu
+# 名前が0のdump工程に対し、追記
+# dumpにてtypeで出力された原子タイプについて、原子タイプが1のものは1ではなくCuと表示させる
+
+
 ## thermoはLAMMMPSのLOGファイルへの出力を設定
 thermo 1
 # 100タイムステップごとにlogファイルへ出力
-thermo_style custom step temp pxx pyy pzz pxy pyz pxz lx ly lz etotal
+thermo_style custom step pxx pyy pzz pxy pyz pxz lx ly lz etotal
 # 出力情報の編集。
 # timestep,temperture,pressure,total energy,simulation timeを出力
 
 
 # STABILIZE INITIAL STATE
 # Set Temperature Following Gaussian Distribution
-# velocity all create ${npt_temp} ${rand} dist gaussian
-# print ${rand}
+#velocity all create ${npt_temp} ${rand} dist gaussian
+#print ${rand}
+#create は乱数を用いる
 
 # Stabilize
-# fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
+#fix 2 all temp/rescale 1 ${npt_temp} ${npt_temp} 0.5 1.0
 # 制約条件の設定
 # 制約条件の名前を2とおく
 # allの原子に対して課す
 # 1タイムステップ毎にtempertureをrescale確認
 # 開始時及び終了時の望ましい温度はそれぞれMD_temp
-run 1000
+#run 1000
 # runを用いて初めて、上記で定義してきた計算を回している。
 # 1000タイムステップ繰り返す
 
-unfix 2
+#unfix 2
 # 制約条件2を外す
 
-run 20000
+#run 1000
+
+minimize 1.0e-8 1.0e-8 10000 10000
 
 #unfix 1
 
